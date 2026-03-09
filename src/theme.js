@@ -1,0 +1,21 @@
+// Design tokens — Light modern theme
+export const C = {
+  saffron: "#FF9F1C",
+  saffronLight: "#FFF3E0",
+  peacock: "#0B72B9",
+  peacockLight: "#E8F4FD",
+  lotus: "#E8738A",
+  basil: "#39A66F",
+  basilLight: "#E6F5EE",
+  bg: "#F7F8FA",
+  surface: "#FFFFFF",
+  surface2: "#F2F4F7",
+  border: "#E5E8EF",
+  text: "#0F172A",
+  text2: "#4B5563",
+  text3: "#9CA3AF",
+  shadow: "0 2px 12px rgba(0,0,0,0.06)",
+  shadowMd: "0 4px 24px rgba(0,0,0,0.10)",
+  radius: "16px",
+  radiusPill: "999px",
+};
