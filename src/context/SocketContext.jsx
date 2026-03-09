@@ -10,7 +10,7 @@ export const SocketProvider = ({ children }) => {
   const connect = (token) => {
     if (socketRef.current) socketRef.current.disconnect();
 
-    const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:5000", {
+    const socket = io(import.meta.env.VITE_SOCKET_URL || "https://folkvizag-882278565284.europe-west1.run.app", {
       auth: { token },
       reconnectionAttempts: 5,
     });
