@@ -4,6 +4,10 @@ import { C } from '../theme';
 import { LayoutDashboard, Calendar, Users, Briefcase, Book, Settings, Layers, Lock, MapPin, Ticket } from 'lucide-react';
 
 import AdminDashboard from '../screens/Admin/AdminDashboard';
+import AdminEvents from '../screens/Admin/AdminEvents';
+import AdminDevotees from '../screens/Admin/AdminDevotees';
+import AdminSandbox from '../screens/Admin/AdminSandbox';
+import AdminConfig from '../screens/Admin/AdminConfig';
 
 export default function AdminApp() {
     const navigate = useNavigate();
@@ -53,8 +57,10 @@ export default function AdminApp() {
             <div style={{ flex: 1, paddingBottom: 60, overflowY: 'auto', position: 'relative' }}>
                 <Routes>
                     <Route path="/dashboard" element={<AdminDashboard />} />
-                    <Route path="/events" element={<div style={{ padding: 24 }}>Admin Events Demo</div>} />
-                    <Route path="/devotees" element={<div style={{ padding: 24 }}>Admin Devotees Demo</div>} />
+                    <Route path="/events" element={<AdminEvents />} />
+                    <Route path="/devotees" element={<AdminDevotees />} />
+                    <Route path="/sandbox" element={<AdminSandbox />} />
+                    <Route path="/config" element={<AdminConfig />} />
                     <Route path="*" element={<AdminDashboard />} />
                 </Routes>
 

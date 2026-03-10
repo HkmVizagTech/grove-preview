@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { C } from '../../theme';
 import { Card, Avatar, Chip, Tag, DailyShloka, OmWatermark } from '../../UI';
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal } from 'lucide-react';
@@ -9,6 +10,7 @@ const POSTS = [
 ];
 
 export default function HomeFeed() {
+    const navigate = useNavigate();
     const [japaLog, setJapaLog] = useState(12);
     const [filter, setFilter] = useState('All');
 
@@ -19,6 +21,18 @@ export default function HomeFeed() {
 
             {/* Top Banner (Shloka) */}
             <DailyShloka />
+
+            {/* Quick Access Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+                <QuickAccessItem icon="📿" label="Sadhana" path="/app/sadhana" />
+                <QuickAccessItem icon="📅" label="Events" path="/app/events" />
+                <QuickAccessItem icon="📖" label="Sankirtan" path="/app/sankirtan" />
+                <QuickAccessItem icon="🎓" label="Courses" path="/app/courses" />
+                <QuickAccessItem icon="🎫" label="Coupons" path="/app/coupons" />
+                <QuickAccessItem icon="🚌" label="Trips" path="/app/trips" />
+                <QuickAccessItem icon="🏛️" label="Ashrams" path="/app/residencies" />
+                <QuickAccessItem icon="📷" label="Scan QR" path="/app/scan" />
+            </div>
 
             {/* Japa Quick-Log */}
             <Card style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -61,6 +75,18 @@ export default function HomeFeed() {
                     <PostCard key={post.id} post={post} />
                 ))}
             </div>
+        </div>
+    );
+}
+
+function QuickAccessItem({ icon, label, path }) {
+    const navigate = useNavigate();
+    return (
+        <div onClick={() => navigate(path)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: C.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, boxShadow: C.shadow }}>
+                {icon}
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 500, textAlign: 'center' }}>{label}</span>
         </div>
     );
 }

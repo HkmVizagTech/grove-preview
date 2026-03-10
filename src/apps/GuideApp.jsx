@@ -4,6 +4,10 @@ import { C } from '../theme';
 import { LayoutDashboard, Users, Calendar, Flame, Book, Menu } from 'lucide-react';
 
 import GuideConsole from '../screens/Guide/GuideConsole';
+import GuideMentees from '../screens/Guide/GuideMentees';
+import GuideEvents from '../screens/Guide/GuideEvents';
+import GuideSadhana from '../screens/Guide/GuideSadhana';
+import GuideSankirtan from '../screens/Guide/GuideSankirtan';
 
 export default function GuideApp() {
     const navigate = useNavigate();
@@ -49,10 +53,10 @@ export default function GuideApp() {
             <div style={{ flex: 1, paddingBottom: 80, overflowY: 'auto', position: 'relative' }}>
                 <Routes>
                     <Route path="/console" element={<GuideConsole />} />
-                    <Route path="/mentees" element={<div style={{ padding: 24 }}>Mentees Demo</div>} />
-                    <Route path="/events" element={<div style={{ padding: 24 }}>Events Demo</div>} />
-                    <Route path="/sadhana" element={<div style={{ padding: 24 }}>Sadhana Demo</div>} />
-                    <Route path="/sankirtan" element={<div style={{ padding: 24 }}>Sankirtan Demo</div>} />
+                    <Route path="/mentees" element={<GuideMentees />} />
+                    <Route path="/events" element={<GuideEvents />} />
+                    <Route path="/sadhana" element={<GuideSadhana />} />
+                    <Route path="/sankirtan" element={<GuideSankirtan />} />
                     <Route path="*" element={<GuideConsole />} />
                 </Routes>
 
