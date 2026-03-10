@@ -1,18 +1,29 @@
 ﻿import React, { useState } from 'react';
 import { C } from '../../theme';
 import { Card, Avatar, PrimaryBtn, Chip, Tag, OmWatermark } from '../../UI';
-import { Settings, PenTool, CheckCircle, Medal, Heart } from 'lucide-react';
+import { Settings, PenTool, CheckCircle, Medal, Heart, LogOut } from 'lucide-react';
+import { UserContext } from '../../App';
+import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
+    const { user, setUser } = React.useContext(UserContext);
+    const navigate = useNavigate();
     const [editMode, setEditMode] = useState(false);
     const [tab, setTab] = useState('Realizations');
     const TABS = ['Realizations', 'Bookmarks', 'Certificates 🎓', 'Seva 🌸'];
+
+    const handleLogout = () => {
+        localStorage.removeItem('folk_token');
+        setUser(null);
+        navigate('/login');
+    };
 
     if (editMode) return <EditProfile onClose={() => setEditMode(false)} />;
 
     return (
         <div style={{ padding: '24px 16px', maxWidth: 600, margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                <LogOut size={24} onClick={handleLogout} style={{ cursor: 'pointer', color: C.lotus }} />
                 <Settings size={28} onClick={() => setEditMode(true)} style={{ cursor: 'pointer', color: C.text2 }} />
             </div>
 

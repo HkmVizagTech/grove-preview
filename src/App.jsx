@@ -9,7 +9,19 @@ import SecurityApp from "./apps/SecurityApp";
 export const UserContext = React.createContext();
 
 export default function App() {
-  const [user, setUser] = useState(null);
+  // Rehydrate user from localStorage so route guards survive navigation/refresh
+  const [user, setUserRaw] = useState(() => {
+    try {
+      const stored = localStorage.getItem('folk_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  });
+
+  const setUser = (u) => {
+    setUserRaw(u);
+    if (u) localStorage.setItem('folk_user', JSON.stringify(u));
+    else localStorage.removeItem('folk_user');
+  };
 
   return (
     <UserContext.Provider value={{ user, setUser }}>

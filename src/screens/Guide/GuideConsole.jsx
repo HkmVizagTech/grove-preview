@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { C } from '../../theme';
 import { Card, PrimaryBtn, Tag } from '../../UI';
-import { Users, QrCode, AlertCircle, FileText, CheckCircle, Flame } from 'lucide-react';
+import { Users, QrCode, AlertCircle, FileText, CheckCircle, Flame, Book } from 'lucide-react';
 
 export default function GuideConsole() {
     const [qrRefresh, setQrRefresh] = useState(60);

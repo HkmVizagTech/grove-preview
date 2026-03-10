@@ -1,14 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { C } from '../../theme';
 import { Card, Tag } from '../../UI';
 import { Users, AlertCircle, TrendingUp, Calendar, HelpCircle } from 'lucide-react';
+import axios from 'axios';
 
 export default function AdminDashboard() {
+    const [stats, setStats] = useState({ devotees: 0, events: 0, posts: 0 });
+
+    useEffect(() => {
+        const token = localStorage.getItem('folk_token');
+        if (!token) return;
+        const h = { headers: { Authorization: `Bearer ${token}` } };
+        Promise.all([
+            axios.get('/api/community/devotees', h),
+            axios.get('/api/events', h),
+            axios.get('/api/posts', h),
+        ]).then(([devs, evs, posts]) => {
+            setStats({
+                devotees: devs.data.length,
+                events: evs.data.length,
+                posts: posts.data.length,
+            });
+        }).catch(console.error);
+    }, []);
+
     const KPIS = [
-        { label: 'Total Devotees', val: '432', color: C.saffron },
-        { label: 'Active This Week', val: '312', color: C.green },
-        { label: 'Avg Japa Rounds', val: '12.4', color: C.gold },
-        { label: 'Events This Mo', val: '18', color: C.lotus },
+        { label: 'Total Devotees', val: stats.devotees || '—', color: C.saffron },
+        { label: 'Events Scheduled', val: stats.events || '—', color: C.green },
+        { label: 'Posts This Week', val: stats.posts || '—', color: C.gold },
+        { label: 'Avg Japa Rounds', val: '12.4', color: C.lotus },
         { label: 'Sankirtan Pts', val: '8,420', color: C.saffron },
         { label: 'Beds Occupied', val: '84%', color: C.green },
     ];

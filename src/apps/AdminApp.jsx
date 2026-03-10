@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { C } from '../theme';
-import { LayoutDashboard, Calendar, Users, Settings, Lock, MapPin, Ticket, Layers, LogOut } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Settings, Lock, MapPin, Ticket, Layers, LogOut, Home } from 'lucide-react';
+import { UserContext } from '../App';
 
 import AdminDashboard from '../screens/Admin/AdminDashboard';
 import AdminEvents from '../screens/Admin/AdminEvents';
 import AdminDevotees from '../screens/Admin/AdminDevotees';
 import AdminSandbox from '../screens/Admin/AdminSandbox';
 import AdminConfig from '../screens/Admin/AdminConfig';
+import AdminCoupons from '../screens/Admin/AdminCoupons';
 
 const NAV = [
     { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard', emoji: '📊' },
@@ -22,6 +24,14 @@ const NAV = [
 export default function AdminApp() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { setUser } = useContext(UserContext);
+
+    const handleLogout = () => {
+        localStorage.removeItem('folk_token');
+        localStorage.removeItem('folk_user');
+        setUser(null);
+        navigate('/login');
+    };
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: C.bg }}>
@@ -71,7 +81,13 @@ export default function AdminApp() {
                         display: 'flex', gap: 10, alignItems: 'center', fontSize: 13,
                         color: C.text3, cursor: 'pointer', padding: '8px 12px', borderRadius: C.radius,
                     }}>
-                        <LogOut size={16} /> Back to FOLK Feed
+                        <Home size={16} /> FOLK Feed
+                    </div>
+                    <div onClick={handleLogout} style={{
+                        display: 'flex', gap: 10, alignItems: 'center', fontSize: 13,
+                        color: C.lotus, cursor: 'pointer', padding: '8px 12px', borderRadius: C.radius,
+                    }}>
+                        <LogOut size={16} /> Logout
                     </div>
                 </div>
             </div>
@@ -86,13 +102,14 @@ export default function AdminApp() {
                     position: 'sticky', top: 0, zIndex: 100,
                 }}>
                     <h2 className="title-font" style={{ color: C.gold, margin: 0, fontSize: 18 }}>FOLK Admin</h2>
-                    <LogOut size={20} color={C.text3} onClick={() => navigate('/app/home')} style={{ cursor: 'pointer' }} />
+                    <LogOut size={20} color={C.lotus} onClick={handleLogout} style={{ cursor: 'pointer' }} />
                 </div>
 
                 <Routes>
                     <Route path="/dashboard" element={<AdminDashboard />} />
                     <Route path="/events" element={<AdminEvents />} />
                     <Route path="/devotees" element={<AdminDevotees />} />
+                    <Route path="/coupons" element={<AdminCoupons />} />
                     <Route path="/sandbox" element={<AdminSandbox />} />
                     <Route path="/config" element={<AdminConfig />} />
                     <Route path="*" element={<AdminDashboard />} />

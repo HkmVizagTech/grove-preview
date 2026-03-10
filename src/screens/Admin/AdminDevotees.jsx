@@ -1,21 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { C } from '../../theme';
 import { Card, Avatar, Tag } from '../../UI';
+import axios from 'axios';
 
 export default function AdminDevotees() {
-    const MEMBERS = [
-        { name: 'Karthik S', spName: 'Krishna Das', batch: 'Students', japa: 16, attendance: 95, role: 'member' },
-        { name: 'Gopinath V', spName: 'Gopinath Das', batch: 'Professionals', japa: 16, attendance: 100, role: 'guide' },
-        { name: 'Admin Prabhu', spName: 'Admin Prabhu', batch: 'Center Admin', japa: '-', attendance: '-', role: 'admin' },
-    ];
+    const [members, setMembers] = useState([]);
+
+    useEffect(() => {
+        const token = localStorage.getItem('folk_token');
+        if (token) {
+            axios.get('/api/community/devotees', { headers: { Authorization: `Bearer ${token}` } })
+                .then(res => setMembers(res.data))
+                .catch(err => console.error(err));
+        }
+    }, []);
 
     return (
         <div style={{ padding: 24, maxWidth: 1000, margin: '0 auto' }}>
             <h2 className="title-font" style={{ color: C.saffron, marginBottom: 24 }}>All Devotees</h2>
 
             <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-                <input placeholder="Search members..." style={{ flex: 1, padding: 12, borderRadius: C.radiusPill, background: C.surface2 }} />
-                <button style={{ padding: '12px 24px', background: C.saffronLight, color: C.saffron, borderRadius: C.radiusPill, fontWeight: 'bold' }}>Filter</button>
+                <input placeholder="Search members..." style={{ flex: 1, padding: 12, borderRadius: C.radiusPill, background: C.surface2, color: C.text, border: 'none', outline: 'none' }} />
+                <button style={{ padding: '12px 24px', background: C.saffronLight, color: C.saffron, borderRadius: C.radiusPill, fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>Filter</button>
             </div>
 
             <Card style={{ padding: 0, overflow: 'hidden' }}>
@@ -29,20 +35,23 @@ export default function AdminDevotees() {
                         </tr>
                     </thead>
                     <tbody>
-                        {MEMBERS.map((m, i) => (
-                            <tr key={i} style={{ borderBottom: `1px solid ${C.border}` }}>
+                        {members.length === 0 && (
+                            <tr><td colSpan={4} style={{ padding: 16, textAlign: 'center', color: C.text3 }}>No devotees found.</td></tr>
+                        )}
+                        {members.map((m) => (
+                            <tr key={m._id} style={{ borderBottom: `1px solid ${C.border}` }}>
                                 <td style={{ padding: 16 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                        <Avatar initials={m.name[0]} size={36} />
+                                        <Avatar initials={(m.spiritualName || m.name || 'D')[0]} size={36} />
                                         <div>
-                                            <div style={{ fontWeight: 'bold' }}>{m.spName}</div>
+                                            <div style={{ fontWeight: 'bold' }}>{m.spiritualName || m.username}</div>
                                             <div style={{ fontSize: 12, color: C.text3 }}>{m.name}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td style={{ padding: 16, color: C.text3 }}>{m.batch}</td>
+                                <td style={{ padding: 16, color: C.text3 }}>{m.batch || 'N/A'}</td>
                                 <td style={{ padding: 16 }}><Tag color={m.role === 'admin' ? C.lotus : m.role === 'guide' ? C.gold : C.saffron}>{m.role}</Tag></td>
-                                <td style={{ padding: 16, fontWeight: 'bold' }}>{m.japa}</td>
+                                <td style={{ padding: 16, fontWeight: 'bold' }}>-</td>
                             </tr>
                         ))}
                     </tbody>

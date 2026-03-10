@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { C } from '../theme';
-import { LayoutDashboard, Users, Calendar, Flame, BookOpen, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, Flame, BookOpen, LogOut, Home } from 'lucide-react';
+import { UserContext } from '../App';
 
 import GuideConsole from '../screens/Guide/GuideConsole';
 import GuideMentees from '../screens/Guide/GuideMentees';
@@ -20,6 +21,14 @@ const NAV = [
 export default function GuideApp() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { setUser } = useContext(UserContext);
+
+    const handleLogout = () => {
+        localStorage.removeItem('folk_token');
+        localStorage.removeItem('folk_user');
+        setUser(null);
+        navigate('/login');
+    };
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: C.bg }}>
@@ -60,12 +69,18 @@ export default function GuideApp() {
                 </div>
 
                 {/* Footer */}
-                <div style={{ padding: 16, borderTop: `1px solid ${C.border}` }}>
+                <div style={{ padding: 16, borderTop: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <div onClick={() => navigate('/app/home')} style={{
                         display: 'flex', gap: 10, alignItems: 'center', fontSize: 13,
                         color: C.text3, cursor: 'pointer', padding: '8px 12px', borderRadius: C.radius,
                     }}>
-                        <LogOut size={16} /> Back to FOLK Feed
+                        <Home size={16} /> Back to FOLK Feed
+                    </div>
+                    <div onClick={handleLogout} style={{
+                        display: 'flex', gap: 10, alignItems: 'center', fontSize: 13,
+                        color: C.lotus, cursor: 'pointer', padding: '8px 12px', borderRadius: C.radius,
+                    }}>
+                        <LogOut size={16} /> Logout
                     </div>
                 </div>
             </div>

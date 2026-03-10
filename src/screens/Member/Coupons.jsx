@@ -1,18 +1,47 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { C } from '../../theme';
 import { Card, Tag, OmWatermark } from '../../UI';
 import { QrCode, Ticket } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { io } from 'socket.io-client';
 
 export default function Coupons() {
     const [tab, setTab] = useState('Active');
+    const [coupons, setCoupons] = useState([]);
+    const [socket, setSocket] = useState(null);
     const TABS = ['Active', 'History'];
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('folk_token');
+        if (token) {
+            axios.get('/api/coupons', { headers: { Authorization: `Bearer ${token}` } })
+                .then(res => setCoupons(res.data))
+                .catch(err => console.error(err));
+        }
+
+        const newSocket = io('/');
+        setSocket(newSocket);
+
+        newSocket.on('new_coupon', (coupon) => {
+            setCoupons(prev => [coupon, ...prev]);
+        });
+
+        newSocket.on('coupon_used', (coupon) => {
+            setCoupons(prev => prev.map(c => c._id === coupon._id ? coupon : c));
+        });
+
+        return () => newSocket.close();
+    }, []);
+
+    const activeCoupons = coupons.filter(c => !c.isUsed);
+    const historyCoupons = coupons.filter(c => c.isUsed);
 
     return (
         <div style={{ padding: '24px 16px', maxWidth: 600, margin: '0 auto', minHeight: '100vh', background: C.bg }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                <h2 className="title-font" style={{ color: C.gold }}>Coupon Wallet</h2>
+                <h2 className="title-font" style={{ color: C.gold, margin: 0 }}>Coupon Wallet</h2>
                 <Ticket color={C.saffron} />
             </div>
 
@@ -30,33 +59,34 @@ export default function Coupons() {
 
             {tab === 'Active' && (
                 <div style={{ display: 'grid', gap: 16 }}>
-                    <CouponCard
-                        type="Prasadam" event="Sunday Love Feast" code="PRSDM-X9W2"
-                        expiry="Valid until March 15" color={C.green}
-                    />
-                    <CouponCard
-                        type="Book Fest" event="Gita Marathon" code="BOKFS-L4P8"
-                        expiry="Valid until April 10" color={C.saffron}
-                    />
+                    {activeCoupons.length === 0 && <p style={{ color: C.text3, textAlign: 'center' }}>No active coupons.</p>}
+                    {activeCoupons.map(c => (
+                        <CouponCard key={c._id} type={c.type} event={c.event} code={c.code} expiry={`Valid until ${new Date(c.expiryDate).toLocaleDateString()}`} color={c.type === 'Prasadam' ? C.green : C.saffron} isUsed={c.isUsed} />
+                    ))}
                 </div>
             )}
 
             {tab === 'History' && (
-                <div style={{ color: C.text3, textAlign: 'center', marginTop: 40 }}>
-                    No past coupons.
+                <div style={{ display: 'grid', gap: 16 }}>
+                    {historyCoupons.length === 0 && <p style={{ color: C.text3, textAlign: 'center' }}>No past coupons.</p>}
+                    {historyCoupons.map(c => (
+                        <CouponCard key={c._id} type={c.type} event={c.event} code={c.code} expiry={`Used on ${new Date(c.updatedAt || c.expiryDate).toLocaleDateString()}`} color={C.surface2} isUsed={c.isUsed} />
+                    ))}
                 </div>
             )}
         </div>
     );
 }
 
-function CouponCard({ type, event, code, expiry, color }) {
+function CouponCard({ type, event, code, expiry, color, isUsed }) {
     return (
         <Card style={{ padding: 0, overflow: 'hidden', border: `1px solid ${C.border}` }} className="card-decoration">
             <OmWatermark />
             <div style={{ background: color, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontWeight: 'bold', color: '#000' }}>{type} Coupon</div>
-                <div style={{ background: 'rgba(0,0,0,0.2)', padding: '2px 8px', borderRadius: C.radiusPill, fontSize: 12, color: '#fff' }}>Unused</div>
+                <div style={{ fontWeight: 'bold', color: isUsed ? C.text2 : '#000' }}>{type} Coupon</div>
+                <div style={{ background: 'rgba(0,0,0,0.2)', padding: '2px 8px', borderRadius: C.radiusPill, fontSize: 12, color: '#fff' }}>
+                    {isUsed ? 'Used' : 'Unused'}
+                </div>
             </div>
 
             <div style={{ padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

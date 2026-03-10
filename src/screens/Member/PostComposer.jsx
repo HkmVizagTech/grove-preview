@@ -9,19 +9,20 @@ export default function PostComposer() {
     const navigate = useNavigate();
     const [tab, setTab] = useState('💭 Realization');
     const [text, setText] = useState('');
+    const [imageUrl, setImageUrl] = useState('');
     const [loading, setLoading] = useState(false);
 
     const TABS = ['💭 Realization', '🏛️ Ashram', '📿 Sadhana Update'];
 
     const handleShare = async () => {
-        if (!text.trim()) return;
+        if (!text.trim() && !imageUrl.trim()) return;
         setLoading(true);
         const token = localStorage.getItem('folk_token');
         try {
             await axios.post('/api/posts', {
                 content: text,
                 tag: tab === '💭 Realization' ? 'Realization' : 'Update',
-                // Optional imageUrl could be passed here
+                imageUrl: imageUrl || null
             }, { headers: { Authorization: `Bearer ${token}` } });
             navigate('/app/home');
         } catch (err) {
@@ -46,7 +47,7 @@ export default function PostComposer() {
             </div>
 
             <Card>
-                {tab === '💭 Realization' && <RealizationMode text={text} setText={setText} />}
+                {tab === '💭 Realization' && <RealizationMode text={text} setText={setText} imageUrl={imageUrl} setImageUrl={setImageUrl} />}
                 {tab === '📿 Sadhana Update' && <SadhanaMode />}
                 {tab === '🏛️ Ashram' && <div style={{ minHeight: 150, padding: 12 }}>Ashram form...</div>}
             </Card>
@@ -58,8 +59,9 @@ export default function PostComposer() {
     );
 }
 
-function RealizationMode({ text, setText }) {
+function RealizationMode({ text, setText, imageUrl, setImageUrl }) {
     const HASHTAGS = ['#HareKrishna', '#FOLK', '#ISKCONVizag', '#Sadhana', '#Kirtan', '#Prasadam'];
+    const [showImageInput, setShowImageInput] = useState(false);
 
     return (
         <>
@@ -72,8 +74,25 @@ function RealizationMode({ text, setText }) {
                 />
             </div>
 
+            {showImageInput && (
+                <div style={{ marginBottom: 16 }}>
+                    <input
+                        type="text"
+                        placeholder="Paste Image URL here (Optional)..."
+                        value={imageUrl}
+                        onChange={e => setImageUrl(e.target.value)}
+                        style={{ width: '100%', padding: '12px 0', borderBottom: `2px solid ${C.saffron}`, background: 'transparent', color: C.text, borderTop: 'none', borderLeft: 'none', borderRight: 'none', outline: 'none' }}
+                    />
+                    {imageUrl && (
+                        <div style={{ marginTop: 8, height: 120, borderRadius: C.radius, overflow: 'hidden' }}>
+                            <img src={imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Preview" onError={(e) => { e.target.style.display = 'none'; }} />
+                        </div>
+                    )}
+                </div>
+            )}
+
             <div style={{ display: 'flex', gap: 16, borderTop: `1px solid ${C.border}`, paddingTop: 16, marginBottom: 16 }}>
-                <Image size={24} color={C.saffron} style={{ cursor: 'pointer' }} />
+                <Image size={24} color={C.saffron} style={{ cursor: 'pointer' }} onClick={() => setShowImageInput(!showImageInput)} />
                 <BookOpen size={24} color={C.gold} style={{ cursor: 'pointer' }} />
                 <Music size={24} color={C.green} style={{ cursor: 'pointer' }} />
             </div>
