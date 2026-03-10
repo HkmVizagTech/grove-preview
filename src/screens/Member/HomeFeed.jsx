@@ -1,18 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { io } from 'socket.io-client';
+import { UserContext } from '../../App';
 import { C } from '../../theme';
 import { Card, Avatar, Chip, Tag, DailyShloka, OmWatermark } from '../../UI';
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal } from 'lucide-react';
 
-const POSTS = [
-    { id: 1, author: 'Radha Priya Dasi', tag: 'Bhakti Sangha Vizag', type: '🌸 Seva Moment', text: 'Beautiful darshan of Sri Sri Radha Madanmohan today morning! The flower decorations are exquisite.', img: 'https://images.unsplash.com/photo-1610486518118-243fd6fde4cc', pranams: 108, comments: 24, time: '2h ago' },
-    { id: 2, author: 'Chaitanya Das', tag: 'Japa Warriors', type: '💭 Realization', text: '"Chanting the holy name is the only way in this age..." Just finished my 16 rounds before 6 AM. The peaceful atmosphere really helps focus the mind.', pranams: 54, comments: 12, time: '5h ago' }
-];
-
 export default function HomeFeed() {
     const navigate = useNavigate();
+    const { user } = useContext(UserContext);
     const [japaLog, setJapaLog] = useState(12);
     const [filter, setFilter] = useState('All');
+    const [posts, setPosts] = useState([]);
+    const [socket, setSocket] = useState(null);
+
+    useEffect(() => {
+        const token = localStorage.getItem('folk_token');
+        if (token) {
+            axios.get('/api/posts', { headers: { Authorization: `Bearer ${token}` } })
+                .then(res => setPosts(res.data))
+                .catch(err => console.error(err));
+        }
+
+        const newSocket = io('/');
+        setSocket(newSocket);
+
+        newSocket.on('new_post', (post) => {
+            setPosts(prev => [post, ...prev]);
+        });
+
+        newSocket.on('post_liked', ({ postId, likes }) => {
+            setPosts(prev => prev.map(p => p._id === postId ? { ...p, likes } : p));
+        });
+
+        return () => newSocket.close();
+    }, []);
 
     const TABS = ['All', 'Posts', '🏛️ Ashrams', '🎵 Kirtan', '📖 Realizations'];
 
@@ -71,8 +94,9 @@ export default function HomeFeed() {
 
             {/* Feed Posts */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                {POSTS.map(post => (
-                    <PostCard key={post.id} post={post} />
+                {posts.length === 0 && <p style={{ textAlign: 'center', color: C.text3 }}>No posts to show.</p>}
+                {posts.map(post => (
+                    <PostCard key={post._id} post={post} user={user} />
                 ))}
             </div>
         </div>
@@ -91,20 +115,34 @@ function QuickAccessItem({ icon, label, path }) {
     );
 }
 
-function PostCard({ post }) {
-    const [liked, setLiked] = useState(false);
-    const handleLike = () => setLiked(!liked);
+function PostCard({ post, user }) {
+    // likes is an array of ObjectIds. Check if current user._id is in it.
+    const isLiked = user && post.likes && post.likes.includes(user._id);
+
+    const handleLike = async () => {
+        const token = localStorage.getItem('folk_token');
+        if (!token) return;
+        try {
+            await axios.post(`/api/posts/${post._id}/like`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const timeString = new Date(post.createdAt).toLocaleDateString();
 
     return (
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: C.radius, overflow: 'hidden' }} className="card-decoration">
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 16 }}>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <Avatar initials={post.author[0]} size={40} />
+                    <Avatar initials={(post.author?.spiritualName || post.author?.name || 'D')[0]} size={40} />
                     <div>
-                        <div style={{ fontWeight: 'bold' }}>{post.author}</div>
+                        <div style={{ fontWeight: 'bold' }}>{post.author?.spiritualName || post.author?.name}</div>
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, marginTop: 2 }}>
-                            <span style={{ color: C.text3 }}>{post.time}</span>
+                            <span style={{ color: C.text3 }}>{timeString}</span>
                             <span>•</span>
                             <span style={{ color: C.saffron }}>{post.tag}</span>
                         </div>
@@ -114,10 +152,9 @@ function PostCard({ post }) {
             </div>
 
             {/* Image if any */}
-            {post.img && (
+            {post.imageUrl && (
                 <div onDoubleClick={handleLike} style={{ width: '100%', height: 300, background: C.surface2, position: 'relative', overflow: 'hidden' }}>
-                    <img src={post.img} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
-                    {/* Mock double tap heart burst layer would go here */}
+                    <img src={post.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
                 </div>
             )}
 
@@ -125,7 +162,7 @@ function PostCard({ post }) {
             <div style={{ padding: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
                     <div style={{ display: 'flex', gap: 16 }}>
-                        <Heart onClick={handleLike} fill={liked ? C.lotus : 'transparent'} color={liked ? C.lotus : C.text} style={{ cursor: 'pointer' }} />
+                        <Heart onClick={handleLike} fill={isLiked ? C.lotus : 'transparent'} color={isLiked ? C.lotus : C.text} style={{ cursor: 'pointer' }} />
                         <MessageCircle />
                         <Send />
                     </div>
@@ -133,16 +170,12 @@ function PostCard({ post }) {
                 </div>
 
                 <div style={{ fontSize: 14, fontWeight: 'bold', marginBottom: 8 }}>
-                    🙏 {post.pranams + (liked ? 1 : 0)} Pranams
-                </div>
-
-                <div style={{ marginBottom: 4 }}>
-                    <Tag color={C.green}>{post.type}</Tag>
+                    🙏 {post.likes ? post.likes.length : 0} Pranams
                 </div>
 
                 <div style={{ fontSize: 14, lineHeight: 1.5, color: C.text2 }}>
-                    <span style={{ fontWeight: 'bold', color: C.text, marginRight: 8 }}>{post.author}</span>
-                    {post.text}
+                    <span style={{ fontWeight: 'bold', color: C.text, marginRight: 8 }}>{post.author?.spiritualName || post.author?.name}</span>
+                    {post.content}
                 </div>
             </div>
         </div>

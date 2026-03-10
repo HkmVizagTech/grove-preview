@@ -3,18 +3,40 @@ import { C } from '../../theme';
 import { Card, PrimaryBtn, Chip, Tag, Avatar } from '../../UI';
 import { X, Image, BookOpen, Music, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function PostComposer() {
     const navigate = useNavigate();
     const [tab, setTab] = useState('💭 Realization');
+    const [text, setText] = useState('');
+    const [loading, setLoading] = useState(false);
+
     const TABS = ['💭 Realization', '🏛️ Ashram', '📿 Sadhana Update'];
+
+    const handleShare = async () => {
+        if (!text.trim()) return;
+        setLoading(true);
+        const token = localStorage.getItem('folk_token');
+        try {
+            await axios.post('/api/posts', {
+                content: text,
+                tag: tab === '💭 Realization' ? 'Realization' : 'Update',
+                // Optional imageUrl could be passed here
+            }, { headers: { Authorization: `Bearer ${token}` } });
+            navigate('/app/home');
+        } catch (err) {
+            console.error(err);
+            alert("Error posting");
+            setLoading(false);
+        }
+    };
 
     return (
         <div style={{ padding: '24px 16px', maxWidth: 600, margin: '0 auto', minHeight: '100vh', background: C.bg }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                 <X size={28} onClick={() => navigate(-1)} style={{ cursor: 'pointer' }} />
-                <h2 className="title-font" style={{ color: C.gold }}>Share Realization</h2>
-                <div /> {/* Spacer */}
+                <h2 className="title-font" style={{ color: C.gold, margin: 0 }}>Share Realization</h2>
+                <div style={{ width: 28 }} /> {/* Spacer */}
             </div>
 
             <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 24, paddingBottom: 8 }}>
@@ -24,19 +46,20 @@ export default function PostComposer() {
             </div>
 
             <Card>
-                {tab === '💭 Realization' && <RealizationMode />}
+                {tab === '💭 Realization' && <RealizationMode text={text} setText={setText} />}
                 {tab === '📿 Sadhana Update' && <SadhanaMode />}
-                {tab === '🏛️ Ashram' && <div style={{ minHeight: 150 }}>Ashram form...</div>}
+                {tab === '🏛️ Ashram' && <div style={{ minHeight: 150, padding: 12 }}>Ashram form...</div>}
             </Card>
 
-            <PrimaryBtn style={{ marginTop: 24 }} onClick={() => navigate(-1)}>Share Mode (Demo)</PrimaryBtn>
+            <PrimaryBtn style={{ marginTop: 24 }} onClick={handleShare}>
+                {loading ? 'Sharing...' : 'Share Now'}
+            </PrimaryBtn>
         </div>
     );
 }
 
-function RealizationMode() {
+function RealizationMode({ text, setText }) {
     const HASHTAGS = ['#HareKrishna', '#FOLK', '#ISKCONVizag', '#Sadhana', '#Kirtan', '#Prasadam'];
-    const [text, setText] = useState('');
 
     return (
         <>
@@ -44,15 +67,15 @@ function RealizationMode() {
                 <Avatar initials="M" size={40} />
                 <textarea
                     placeholder="Share a verse, realization, or seva experience... Hare Krishna 🙏"
-                    style={{ width: '100%', minHeight: 120, fontSize: 16, lineHeight: 1.5, resize: 'none' }}
+                    style={{ width: '100%', minHeight: 120, fontSize: 16, lineHeight: 1.5, resize: 'none', background: 'transparent', color: C.text, border: 'none', outline: 'none' }}
                     value={text} onChange={e => setText(e.target.value)}
                 />
             </div>
 
             <div style={{ display: 'flex', gap: 16, borderTop: `1px solid ${C.border}`, paddingTop: 16, marginBottom: 16 }}>
-                <Image size={24} color={C.saffron} />
-                <BookOpen size={24} color={C.gold} />
-                <Music size={24} color={C.green} />
+                <Image size={24} color={C.saffron} style={{ cursor: 'pointer' }} />
+                <BookOpen size={24} color={C.gold} style={{ cursor: 'pointer' }} />
+                <Music size={24} color={C.green} style={{ cursor: 'pointer' }} />
             </div>
 
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
