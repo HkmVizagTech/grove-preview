@@ -1,68 +1,151 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Serif:ital,wght@0,400;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Tiro+Devanagari+Sanskrit:ital,wght@0,400;1,400&display=swap');
 
 /* ── Reset ──────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 :root {
   --saffron: #FF9F1C;
-  --saffron-light: #FFF3E0;
-  --saffron-mid: #FFD580;
-  --peacock: #0B72B9;
-  --peacock-light: #E8F4FD;
-  --lotus: #E8738A;
-  --lotus-light: #FDE8ED;
-  --basil: #39A66F;
-  --basil-light: #E6F5EE;
-  --bg: #F7F8FA;
-  --surface: #FFFFFF;
-  --surface2: #F2F4F7;
-  --border: #E5E8EF;
-  --text: #0F172A;
-  --text2: #4B5563;
-  --text3: #9CA3AF;
-  --shadow: 0 2px 12px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 24px rgba(0,0,0,0.10);
+  --gold: #F4C430;
+  --sacred-green: #6B8F47;
+  --bg: #0D0800;
+  --surface: #130E02;
+  --surface2: #1A1305;
+  --border: #2A1F0A;
+  --text: #F3EFEA;
+  --text2: #B3A895;
+  --text3: #7C7260;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.6);
   --radius: 16px;
   --radius-sm: 10px;
   --radius-pill: 999px;
+
+  --gradient-saffron: linear-gradient(135deg, #FF9F1C, #F4C430);
 }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar { width: 0; height: 0; }
+h1,
+h2,
+h3,
+h4,
+.title-font,
+.app-name {
+  font-family: 'Tiro Devanagari Sanskrit', serif;
+  font-weight: 400;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
 
 /* ── Utility ────────────────────────────────────────────────── */
-button { font-family: inherit; cursor: pointer; border: none; outline: none; }
-input, textarea { font-family: inherit; outline: none; border: none; }
-a { text-decoration: none; color: inherit; }
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: inherit;
+}
+
+input,
+textarea {
+  font-family: inherit;
+  outline: none;
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ── Specific Visual Motifs ─────────────────────────────────── */
+.om-watermark {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 64px;
+  color: var(--gold);
+  opacity: 0.05;
+  pointer-events: none;
+  font-family: 'Tiro Devanagari Sanskrit', serif;
+}
+
+.card-decoration {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-decoration::after {
+  content: 'ॐ';
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 64px;
+  color: var(--gold);
+  opacity: 0.05;
+  pointer-events: none;
+  font-family: 'Tiro Devanagari Sanskrit', serif;
+}
 
 /* ── Animations ─────────────────────────────────────────────── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.06); }
-}
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes scanline {
-  0%, 100% { top: 15%; }
-  50% { top: 78%; }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.fade-up { animation: fadeUp 0.35s ease both; }
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.fade-up {
+  animation: fadeUp 0.35s ease both;
+}
+
 .skeleton {
-  background: linear-gradient(90deg, #E5E8EF 25%, #F2F4F7 50%, #E5E8EF 75%);
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;

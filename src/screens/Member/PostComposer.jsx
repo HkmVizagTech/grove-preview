@@ -1,0 +1,94 @@
+﻿import React, { useState } from 'react';
+import { C } from '../../theme';
+import { Card, PrimaryBtn, Chip, Tag, Avatar } from '../../UI';
+import { X, Image, BookOpen, Music, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+export default function PostComposer() {
+    const navigate = useNavigate();
+    const [tab, setTab] = useState('💭 Realization');
+    const TABS = ['💭 Realization', '🏛️ Ashram', '📿 Sadhana Update'];
+
+    return (
+        <div style={{ padding: '24px 16px', maxWidth: 600, margin: '0 auto', minHeight: '100vh', background: C.bg }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <X size={28} onClick={() => navigate(-1)} style={{ cursor: 'pointer' }} />
+                <h2 className="title-font" style={{ color: C.gold }}>Share Realization</h2>
+                <div /> {/* Spacer */}
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 24, paddingBottom: 8 }}>
+                {TABS.map(t => (
+                    <Chip key={t} active={t === tab} onClick={() => setTab(t)}>{t}</Chip>
+                ))}
+            </div>
+
+            <Card>
+                {tab === '💭 Realization' && <RealizationMode />}
+                {tab === '📿 Sadhana Update' && <SadhanaMode />}
+                {tab === '🏛️ Ashram' && <div style={{ minHeight: 150 }}>Ashram form...</div>}
+            </Card>
+
+            <PrimaryBtn style={{ marginTop: 24 }} onClick={() => navigate(-1)}>Share Mode (Demo)</PrimaryBtn>
+        </div>
+    );
+}
+
+function RealizationMode() {
+    const HASHTAGS = ['#HareKrishna', '#FOLK', '#ISKCONVizag', '#Sadhana', '#Kirtan', '#Prasadam'];
+    const [text, setText] = useState('');
+
+    return (
+        <>
+            <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+                <Avatar initials="M" size={40} />
+                <textarea
+                    placeholder="Share a verse, realization, or seva experience... Hare Krishna 🙏"
+                    style={{ width: '100%', minHeight: 120, fontSize: 16, lineHeight: 1.5, resize: 'none' }}
+                    value={text} onChange={e => setText(e.target.value)}
+                />
+            </div>
+
+            <div style={{ display: 'flex', gap: 16, borderTop: `1px solid ${C.border}`, paddingTop: 16, marginBottom: 16 }}>
+                <Image size={24} color={C.saffron} />
+                <BookOpen size={24} color={C.gold} />
+                <Music size={24} color={C.green} />
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {HASHTAGS.map(h => (
+                    <Tag key={h} color={C.text2}><span onClick={() => setText(text + ' ' + h)} style={{ cursor: 'pointer' }}>{h}</span></Tag>
+                ))}
+            </div>
+        </>
+    );
+}
+
+function SadhanaMode() {
+    return (
+        <div style={{ padding: 12 }}>
+            <h3>Quick Sadhana Share</h3>
+            <p style={{ color: C.text2, fontSize: 13, marginBottom: 16 }}>This will auto-generate a beautiful shareable card with your daily stats.</p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <label style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <input type="checkbox" defaultChecked />
+                    <span>Completed 16 Rounds Japa</span>
+                </label>
+                <label style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <input type="checkbox" defaultChecked />
+                    <span>Attended Mangala Arati</span>
+                </label>
+                <label style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <input type="checkbox" />
+                    <span>Read 10 pages Bhagavad Gita</span>
+                </label>
+            </div>
+
+            <div style={{ marginTop: 24, padding: 16, background: C.gradient, borderRadius: C.radius, color: '#000', textAlign: 'center', fontWeight: 'bold' }}>
+                <div style={{ fontSize: 24, marginBottom: 8 }}>🔥 16 Rounds Done!</div>
+                Mangala Arati Attended
+            </div>
+        </div>
+    );
+}
