@@ -9,6 +9,7 @@ export default function Profile() {
     const { user, setUser } = React.useContext(UserContext);
     const navigate = useNavigate();
     const [editMode, setEditMode] = useState(false);
+    const [showQR, setShowQR] = useState(false);
     const [tab, setTab] = useState('Realizations');
     const TABS = ['Realizations', 'Bookmarks', 'Certificates 🎓', 'Seva 🌸'];
 
@@ -31,9 +32,35 @@ export default function Profile() {
                 <OmWatermark />
                 <Avatar initials="K" size={120} lotusRing />
 
-                <h2 className="title-font" style={{ marginTop: 16, fontSize: 24 }}>Krishna Das</h2>
-                <div style={{ color: C.text2, marginBottom: 8 }}>@krishnadas · ISKCON Vizag</div>
-                <Tag color={C.gold}>Temple Folk</Tag>
+                <h2 className="title-font" style={{ marginTop: 16, fontSize: 24 }}>{user?.spiritualName || user?.name || 'Krishna Das'}</h2>
+                <div style={{ color: C.text2, marginBottom: 8 }}>@{user?.username || 'krishnadas'} · {user?.center || 'ISKCON Vizag'}</div>
+                <Tag color={C.gold}>{user?.role?.toUpperCase() || 'MEMBER'}</Tag>
+
+                <div
+                    onClick={() => setShowQR(!showQR)}
+                    style={{
+                        marginTop: 16, padding: '8px 16px', background: C.surface2,
+                        borderRadius: C.radiusPill, display: 'flex', alignItems: 'center', gap: 8,
+                        cursor: 'pointer', border: `1px solid ${C.border}`
+                    }}
+                >
+                    <Settings size={14} color={C.saffron} /> {showQR ? 'Hide QR' : 'Show My QR Pass'}
+                </div>
+
+                {showQR && (
+                    <Card style={{ marginTop: 16, padding: 16, textAlign: 'center', border: `2px solid ${C.saffron}` }}>
+                        <div style={{ background: '#fff', padding: 12, borderRadius: 12, display: 'inline-block' }}>
+                            <img
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${user?._id}`}
+                                alt="QR Code"
+                                style={{ width: 180, height: 180 }}
+                            />
+                        </div>
+                        <div style={{ fontSize: 12, color: C.text3, marginTop: 12 }}>
+                            Show this to Security for Attendance
+                        </div>
+                    </Card>
+                )}
 
                 <div style={{ fontSize: 10, letterSpacing: 1, marginTop: 12, textTransform: 'uppercase', color: C.saffron }}>
                     All Glories to Srila Prabhupada 🙏
