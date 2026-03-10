@@ -1,13 +1,11 @@
 import React, { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
-import { C } from "./theme";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AuthApp from "./apps/AuthApp";
 import MemberApp from "./apps/MemberApp";
 import GuideApp from "./apps/GuideApp";
 import AdminApp from "./apps/AdminApp";
 import SecurityApp from "./apps/SecurityApp";
 
-// Mock User Context
 export const UserContext = React.createContext();
 
 export default function App() {
@@ -18,30 +16,73 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<AuthApp />} />
-          <Route path="/app/*" element={<RequireAuth role="member"><MemberApp /></RequireAuth>} />
-          <Route path="/guide/*" element={<RequireAuth role="guide"><GuideApp /></RequireAuth>} />
-          <Route path="/admin/*" element={<RequireAuth role="admin"><AdminApp /></RequireAuth>} />
-          <Route path="/security/*" element={<RequireAuth role="security"><SecurityApp /></RequireAuth>} />
-          <Route path="*" element={<Navigate to={user ? getDefaultRoute(user.role) : "/login"} replace />} />
+
+          {/* Member */}
+          <Route
+            path="/app/*"
+            element={
+              user ? <MemberApp /> : <Navigate to="/login" replace />
+            }
+          />
+
+          {/* Guide — guide, admin, head all allowed */}
+          <Route
+            path="/guide/*"
+            element={
+              user && ["guide", "admin", "head"].includes(user.role)
+                ? <GuideApp />
+                : user
+                  ? <Navigate to="/app/home" replace />
+                  : <Navigate to="/login" replace />
+            }
+          />
+
+          {/* Admin — admin, head allowed */}
+          <Route
+            path="/admin/*"
+            element={
+              user && ["admin", "head"].includes(user.role)
+                ? <AdminApp />
+                : user
+                  ? <Navigate to="/app/home" replace />
+                  : <Navigate to="/login" replace />
+            }
+          />
+
+          {/* Security */}
+          <Route
+            path="/security/*"
+            element={
+              user && ["security", "admin"].includes(user.role)
+                ? <SecurityApp />
+                : user
+                  ? <Navigate to="/app/home" replace />
+                  : <Navigate to="/login" replace />
+            }
+          />
+
+          {/* Root redirect */}
+          <Route
+            path="*"
+            element={
+              <Navigate
+                to={
+                  !user
+                    ? "/login"
+                    : ["admin", "head"].includes(user.role)
+                      ? "/admin/dashboard"
+                      : user.role === "guide"
+                        ? "/guide/console"
+                        : user.role === "security"
+                          ? "/security/scan"
+                          : "/app/home"
+                }
+                replace
+              />
+            }
+          />
         </Routes>
       </BrowserRouter>
     </UserContext.Provider>
   );
-}
-
-function RequireAuth({ children, role }) {
-  const { user } = React.useContext(UserContext);
-  if (!user) return <Navigate to="/login" replace />;
-  if (role === "admin" && !["admin", "head"].includes(user.role)) return <Navigate to="/login" replace />;
-  if (role === "guide" && !["guide", "admin", "head"].includes(user.role)) return <Navigate to="/login" replace />;
-  // Assuming all authed users can access member section, except specifically security
-  // But let's just let it pass for the demo
-  return children;
-}
-
-function getDefaultRoute(role) {
-  if (["admin", "head"].includes(role)) return "/admin/dashboard";
-  if (role === "guide") return "/guide/console";
-  if (role === "security") return "/security/scan";
-  return "/app/home";
 }
