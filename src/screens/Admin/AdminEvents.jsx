@@ -3,7 +3,7 @@ import { C } from '../../theme';
 import { Card, PrimaryBtn, Tag } from '../../UI';
 import { Users } from 'lucide-react';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import { createSocket } from '../../api';
 
 export default function AdminEvents() {
     const [events, setEvents] = useState([]);
@@ -17,7 +17,7 @@ export default function AdminEvents() {
                 .catch(err => console.error(err));
         }
 
-        const newSocket = io('/');
+        const newSocket = createSocket();
         setSocket(newSocket);
 
         newSocket.on('new_event', (event) => {

@@ -4,7 +4,7 @@ import { Card, Tag, OmWatermark } from '../../UI';
 import { QrCode, Ticket } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import { createSocket } from '../../api';
 
 export default function Coupons() {
     const [tab, setTab] = useState('Active');
@@ -21,7 +21,7 @@ export default function Coupons() {
                 .catch(err => console.error(err));
         }
 
-        const newSocket = io('/');
+        const newSocket = createSocket();
         setSocket(newSocket);
 
         newSocket.on('new_coupon', (coupon) => {

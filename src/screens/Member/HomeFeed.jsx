@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import { createSocket } from '../../api';
 import { UserContext } from '../../App';
 import { C } from '../../theme';
 import { Card, Avatar, Chip, Tag, DailyShloka, OmWatermark } from '../../UI';
@@ -23,7 +23,7 @@ export default function HomeFeed() {
                 .catch(err => console.error(err));
         }
 
-        const newSocket = io('/');
+        const newSocket = createSocket();
         setSocket(newSocket);
 
         newSocket.on('new_post', (post) => {

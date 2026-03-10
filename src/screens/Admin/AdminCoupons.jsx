@@ -3,7 +3,7 @@ import { C } from '../../theme';
 import { Card, Tag, PrimaryBtn } from '../../UI';
 import { Ticket, Plus, Check } from 'lucide-react';
 import axios from 'axios';
-import { io } from 'socket.io-client';
+import { createSocket } from '../../api';
 
 export default function AdminCoupons() {
     const [coupons, setCoupons] = useState([]);
@@ -19,7 +19,7 @@ export default function AdminCoupons() {
                 .catch(err => console.error(err));
         }
 
-        const socket = io('/');
+        const socket = createSocket();
         socket.on('new_coupon', (c) => setCoupons(prev => [c, ...prev]));
         socket.on('coupon_used', (c) => setCoupons(prev => prev.map(x => x._id === c._id ? c : x)));
         return () => socket.close();
