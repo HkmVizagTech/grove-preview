@@ -21,6 +21,22 @@ export default function AuthApp() {
         try {
             await axios.post('/api/auth/otp/start', { identifier });
             setStep(2);
+
+            // Fetch Dev OTP if in dev mode
+            if (import.meta.env.VITE_API_URL?.includes('localhost')) {
+                setTimeout(async () => {
+                    try {
+                        const res = await axios.get(`/api/dev/otp/${identifier}`);
+                        if (res.data?.otp) {
+                            alert(`DEV MODE: Your OTP is ${res.data.otp}`);
+                            setOtp(res.data.otp);
+                        }
+                    } catch (e) {
+                        console.log('Dev OTP fetch failed', e);
+                    }
+                }, 1000);
+            }
+
         } catch (err) {
             setError(err.response?.data?.message || "Failed to send OTP. Please try again.");
         }

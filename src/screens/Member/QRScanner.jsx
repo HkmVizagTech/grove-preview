@@ -1,10 +1,11 @@
 ﻿import React, { useState, useContext } from 'react';
 import { C } from '../../theme';
 import { Card, PrimaryBtn, Tag } from '../../UI';
-import { QrCode, X, CheckCircle } from 'lucide-react';
+import { X, CheckCircle, Camera } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../App';
 import axios from 'axios';
+import { Scanner } from '@yudiel/react-qr-scanner';
 
 export default function QRScanner() {
     const navigate = useNavigate();
@@ -12,15 +13,21 @@ export default function QRScanner() {
     const [scanState, setScanState] = useState('scanning'); // scanning, processing, success
     const [loading, setLoading] = useState(false);
 
-    const handleSelfCheckIn = async () => {
+    const handleSelfCheckIn = async (data) => {
+        // Prevent multiple fires
+        if (scanState !== 'scanning') return;
+
         setLoading(true);
         setScanState('processing');
         const token = localStorage.getItem('folk_token');
         try {
+            // Depending on architecture, we assume member is scanning a booth QR code,
+            // or another devotee's QR code (if they have permissions). 
+            // In either case, we send the checkin request based on their identity right now.
             await axios.post('/api/attendance/check-in', {
                 devoteeId: user?.id,
                 type: 'Daily',
-                location: 'Self Scan Booth'
+                location: data || 'Self Scan Booth'
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -38,21 +45,30 @@ export default function QRScanner() {
         <div style={{ padding: '24px 16px', maxWidth: 600, margin: '0 auto', minHeight: '100vh', background: C.bg, display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, zIndex: 10 }}>
                 <X size={28} onClick={() => navigate(-1)} style={{ cursor: 'pointer', color: C.text }} />
-                <h2 className="title-font" style={{ color: C.gold }}>Scan Attendance</h2>
+                <h2 className="title-font" style={{ color: C.gold }}>Self Check-in Scanner</h2>
                 <div style={{ width: 28 }} />
             </div>
 
             {scanState === 'scanning' && (
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                    <div style={{ width: 280, height: 280, border: `4px dashed ${C.saffron}`, borderRadius: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255, 159, 28, 0.1)' }} />
-                        <QrCode size={64} color={C.saffron} />
+
+                    <div style={{ width: 300, height: 300, borderRadius: 24, overflow: 'hidden', border: `4px dashed ${C.saffron}`, position: 'relative' }}>
+                        <Scanner
+                            onScan={(result) => handleSelfCheckIn(result[0]?.rawValue || result)}
+                            formats={['qr_code']}
+                            components={{ audio: false, finder: false }}
+                            styles={{ container: { width: '100%', height: '100%' } }}
+                        />
                     </div>
-                    <div style={{ color: C.text3, marginTop: 24, fontSize: 16 }}>Scanning Booth QR...</div>
+
+                    <div style={{ color: C.text3, marginTop: 24, fontSize: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Camera size={20} color={C.saffron} />
+                        Point at Booth QR Code
+                    </div>
 
                     <div style={{ position: 'absolute', bottom: 40, width: '100%', textAlign: 'center' }}>
-                        <PrimaryBtn onClick={handleSelfCheckIn} style={{ width: '80%' }}>
-                            Simulate Scan (Booth) 📸
+                        <PrimaryBtn onClick={() => handleSelfCheckIn('Manual Override')} style={{ width: '80%', background: C.surface2, color: C.text }}>
+                            Skip & Trigger Check-in Manually
                         </PrimaryBtn>
                     </div>
                 </div>
@@ -75,6 +91,9 @@ export default function QRScanner() {
                         <div style={{ marginTop: 24, fontSize: 13, color: C.text3 }}>Your attendance has been updated in real-time.</div>
 
                         <PrimaryBtn onClick={() => navigate('/app/attendance')} style={{ marginTop: 24 }}>View History</PrimaryBtn>
+                        <button onClick={() => setScanState('scanning')} style={{ width: '100%', padding: '12px', background: 'transparent', border: 'none', color: C.text3, marginTop: 12, fontWeight: 'bold', cursor: 'pointer' }}>
+                            Scan Again
+                        </button>
                     </Card>
                 </div>
             )}
