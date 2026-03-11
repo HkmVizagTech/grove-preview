@@ -5,7 +5,7 @@ import { Users, AlertCircle, TrendingUp, Calendar, HelpCircle } from 'lucide-rea
 import axios from 'axios';
 
 export default function AdminDashboard() {
-    const [stats, setStats] = useState({ devotees: 0, events: 0, posts: 0, attendance: 0 });
+    const [stats, setStats] = useState({ devotees: 0, events: 0, posts: 0, attendance: 0, avgJapa: 0, totalSankirtanPts: 0, pendingSankirtan: 0 });
 
     useEffect(() => {
         const token = localStorage.getItem('folk_token');
@@ -22,6 +22,9 @@ export default function AdminDashboard() {
                 events: evs.data.length,
                 posts: posts.data.length,
                 attendance: attn.data.todayCount,
+                avgJapa: attn.data.avgJapa,
+                totalSankirtanPts: attn.data.totalSankirtanPts,
+                pendingSankirtan: attn.data.pendingSankirtan
             });
         }).catch(console.error);
     }, []);
@@ -30,9 +33,9 @@ export default function AdminDashboard() {
         { label: 'Total Devotees', val: stats.devotees || '0', color: C.saffron },
         { label: 'Attendance Today', val: stats.attendance || '0', color: C.green },
         { label: 'Live Events', val: stats.events || '0', color: C.gold },
-        { label: 'Avg Japa Rounds', val: '12.4', color: C.lotus },
-        { label: 'Sankirtan Pts', val: '8,420', color: C.saffron },
-        { label: 'Beds Occupied', val: '84%', color: C.green },
+        { label: 'Avg Japa Rounds', val: stats.avgJapa || '0.0', color: C.lotus },
+        { label: 'Sankirtan Pts', val: stats.totalSankirtanPts || '0', color: C.saffron },
+        { label: 'Beds Occupied', val: '84%', color: C.green }, // Mocked for now
     ];
 
     return (
@@ -86,7 +89,7 @@ export default function AdminDashboard() {
                 <Card style={{ borderLeft: `4px solid ${C.lotus}` }}>
                     <div style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>Quick Alerts</div>
                     <QueueItem icon={<Calendar color={C.saffron} />} count={3} label="Events today" />
-                    <QueueItem icon={<HelpCircle color={C.lotus} />} count={42} label="Pending sankirtan verifications" />
+                    <QueueItem icon={<HelpCircle color={C.lotus} />} count={stats.pendingSankirtan || 0} label="Pending sankirtan verifications" />
                     <QueueItem icon={<AlertCircle color={C.text2} />} count={8} label="Open accommodation requests" />
                     <QueueItem icon={<AlertCircle color={C.text2} />} count={2} label="Reported content" />
                 </Card>

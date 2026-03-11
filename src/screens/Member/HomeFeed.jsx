@@ -4,16 +4,15 @@ import axios from 'axios';
 import { createSocket } from '../../api';
 import { UserContext } from '../../App';
 import { C } from '../../theme';
-import { Card, Avatar, Chip, Tag, DailyShloka, OmWatermark } from '../../UI';
+import { Card, Avatar, Chip, DailyShloka, OmWatermark } from '../../UI';
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal } from 'lucide-react';
 
 export default function HomeFeed() {
     const navigate = useNavigate();
     const { user } = useContext(UserContext);
-    const [japaLog, setJapaLog] = useState(12);
+    const [japaLog, setJapaLog] = useState(0);
     const [filter, setFilter] = useState('All');
     const [posts, setPosts] = useState([]);
-    const [socket, setSocket] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem('folk_token');
@@ -21,23 +20,41 @@ export default function HomeFeed() {
             axios.get('/api/posts', { headers: { Authorization: `Bearer ${token}` } })
                 .then(res => setPosts(res.data))
                 .catch(err => console.error(err));
+
+            // Also fetch today's sadhana for japa log
+            axios.get('/api/sadhana', { headers: { Authorization: `Bearer ${token}` } })
+                .then(res => {
+                    const today = new Date().toISOString().split('T')[0];
+                    const todayLog = res.data.find(l => l.date.split('T')[0] === today);
+                    if (todayLog) setJapaLog(todayLog.japaRounds || 0);
+                });
         }
 
         const newSocket = createSocket();
-        setSocket(newSocket);
 
         newSocket.on('new_post', (post) => {
             setPosts(prev => [post, ...prev]);
         });
 
         newSocket.on('post_liked', ({ postId, likes }) => {
-            setPosts(prev => prev.map(p => p._id === postId ? { ...p, likes } : p));
+            setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes } : p));
         });
 
-        return () => newSocket.close();
+        return () => newSocket.destroy();
     }, []);
 
     const TABS = ['All', 'Posts', '🏛️ Ashrams', '🎵 Kirtan', '📖 Realizations'];
+
+    const handleQuickJapa = async (n) => {
+        const token = localStorage.getItem('folk_token');
+        const newRounds = Math.min(16, japaLog + n);
+        setJapaLog(newRounds);
+        try {
+            await axios.post('/api/sadhana', { japaRounds: newRounds }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } catch (err) { console.error(err); }
+    };
 
     return (
         <div style={{ padding: '24px 16px', maxWidth: 600, margin: '0 auto' }}>
@@ -49,7 +66,7 @@ export default function HomeFeed() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
                 <QuickAccessItem icon="📿" label="Sadhana" path="/app/sadhana" />
                 <QuickAccessItem icon="📅" label="Events" path="/app/events" />
-                <QuickAccessItem icon="📖" label="Sankirtan" path="/app/sankirtan" />
+                <QuickAccessItem icon="📖" label="Vani" path="/app/chat" />
                 <QuickAccessItem icon="🎓" label="Courses" path="/app/courses" />
                 <QuickAccessItem icon="🎫" label="Coupons" path="/app/coupons" />
                 <QuickAccessItem icon="🚌" label="Trips" path="/app/trips" />
@@ -68,8 +85,8 @@ export default function HomeFeed() {
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                     {[1, 2, 4].map(n => (
-                        <button key={n} onClick={() => setJapaLog(Math.min(16, japaLog + n))} style={{
-                            background: C.surface2, padding: '6px 10px', borderRadius: C.radiusPill, border: `1px solid ${C.border}`
+                        <button key={n} onClick={() => handleQuickJapa(n)} style={{
+                            background: C.surface2, padding: '6px 10px', borderRadius: C.radiusPill, border: `1px solid ${C.border}`, cursor: 'pointer'
                         }}>+{n}</button>
                     ))}
                 </div>
@@ -94,9 +111,9 @@ export default function HomeFeed() {
 
             {/* Feed Posts */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                {posts.length === 0 && <p style={{ textAlign: 'center', color: C.text3 }}>No posts to show.</p>}
+                {posts.length === 0 && <p style={{ textAlign: 'center', color: C.text3 }}>No realizations shared yet.</p>}
                 {posts.map(post => (
-                    <PostCard key={post._id} post={post} user={user} />
+                    <PostCard key={post.id} post={post} user={user} />
                 ))}
             </div>
         </div>
@@ -116,14 +133,13 @@ function QuickAccessItem({ icon, label, path }) {
 }
 
 function PostCard({ post, user }) {
-    // likes is an array of ObjectIds. Check if current user._id is in it.
-    const isLiked = user && post.likes && post.likes.includes(user._id);
+    const isLiked = user && post.likes && post.likes.includes(user.id);
 
     const handleLike = async () => {
         const token = localStorage.getItem('folk_token');
         if (!token) return;
         try {
-            await axios.post(`/api/posts/${post._id}/like`, {}, {
+            await axios.post(`/api/posts/${post.id}/pranam`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
         } catch (err) {
@@ -132,33 +148,31 @@ function PostCard({ post, user }) {
     };
 
     const timeString = new Date(post.createdAt).toLocaleDateString();
+    const displayName = post.user?.spiritualName || post.user?.displayName || 'Devotee';
 
     return (
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: C.radius, overflow: 'hidden' }} className="card-decoration">
-            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 16 }}>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <Avatar initials={(post.author?.spiritualName || post.author?.name || 'D')[0]} size={40} />
+                    <Avatar initials={displayName[0]} size={40} />
                     <div>
-                        <div style={{ fontWeight: 'bold' }}>{post.author?.spiritualName || post.author?.name}</div>
+                        <div style={{ fontWeight: 'bold' }}>{displayName}</div>
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12, marginTop: 2 }}>
                             <span style={{ color: C.text3 }}>{timeString}</span>
                             <span>•</span>
-                            <span style={{ color: C.saffron }}>{post.tag}</span>
+                            <span style={{ color: C.saffron }}>{post.tag || 'Realization'}</span>
                         </div>
                     </div>
                 </div>
                 <MoreHorizontal color={C.text3} />
             </div>
 
-            {/* Image if any */}
-            {post.imageUrl && (
+            {post.media?.urls?.[0] && (
                 <div onDoubleClick={handleLike} style={{ width: '100%', height: 300, background: C.surface2, position: 'relative', overflow: 'hidden' }}>
-                    <img src={post.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
+                    <img src={post.media.urls[0]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
             )}
 
-            {/* Content & Actions */}
             <div style={{ padding: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
                     <div style={{ display: 'flex', gap: 16 }}>
@@ -174,7 +188,7 @@ function PostCard({ post, user }) {
                 </div>
 
                 <div style={{ fontSize: 14, lineHeight: 1.5, color: C.text2 }}>
-                    <span style={{ fontWeight: 'bold', color: C.text, marginRight: 8 }}>{post.author?.spiritualName || post.author?.name}</span>
+                    <span style={{ fontWeight: 'bold', color: C.text, marginRight: 8 }}>{displayName}</span>
                     {post.content}
                 </div>
             </div>

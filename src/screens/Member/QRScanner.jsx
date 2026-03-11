@@ -18,7 +18,7 @@ export default function QRScanner() {
         const token = localStorage.getItem('folk_token');
         try {
             await axios.post('/api/attendance/check-in', {
-                devoteeId: user?._id,
+                devoteeId: user?.id,
                 type: 'Daily',
                 location: 'Self Scan Booth'
             }, {

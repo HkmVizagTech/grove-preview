@@ -71,7 +71,7 @@ export default function ChatScreen() {
       socket.emit("send_message", { threadId: activeThread._id, text });
       socket.emit("stop_typing", { threadId: activeThread._id });
     } else {
-      await api.post(`/api/chat`, { threadId: activeThread._id, text }).catch(() => {});
+      await api.post(`/api/chat`, { threadId: activeThread._id, text }).catch(() => { });
     }
   };
 
@@ -87,7 +87,7 @@ export default function ChatScreen() {
   if (!activeThread) return (
     <div style={{ background: C.bg, minHeight: "100%" }}>
       <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: "14px 20px", position: "sticky", top: 0, zIndex: 10 }}>
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: C.text }}>💬 Messages</h2>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: C.text }}>💬 Vani</h2>
       </div>
       <div style={{ padding: "12px 16px" }}>
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, padding: "10px 14px", display: "flex", gap: 8, alignItems: "center", marginBottom: 16 }}>

@@ -92,7 +92,7 @@ function CouponCard({ type, event, code, expiry, color, isUsed }) {
             <div style={{ padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                     <h3 style={{ fontSize: 18, marginBottom: 4 }}>{event}</h3>
-                    <div style={{ color: C.text3, fontSize: 13, marginBottom: 16 }}>{expiry} • ISKCON Vizag</div>
+                    <div style={{ color: C.text3, fontSize: 13, marginBottom: 16 }}>{expiry} • HKM Vizag</div>
 
                     <div style={{ fontFamily: 'monospace', letterSpacing: 4, fontSize: 16, fontWeight: 'bold', background: C.surface2, padding: '8px 12px', borderRadius: C.radius, display: 'inline-block' }}>
                         {code}

@@ -60,7 +60,7 @@ export default function PostComposer() {
 }
 
 function RealizationMode({ text, setText, imageUrl, setImageUrl }) {
-    const HASHTAGS = ['#HareKrishna', '#FOLK', '#ISKCONVizag', '#Sadhana', '#Kirtan', '#Prasadam'];
+    const HASHTAGS = ['#HareKrishna', '#FOLK', '#HKMVizag', '#Sadhana', '#Kirtan', '#Prasadam'];
     const [showImageInput, setShowImageInput] = useState(false);
 
     return (

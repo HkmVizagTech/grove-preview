@@ -44,7 +44,7 @@ export default function AdminApp() {
                 position: 'sticky', top: 0, height: '100vh', flexShrink: 0,
             }}>
                 <div style={{ padding: '24px 24px 16px', borderBottom: `1px solid ${C.border}` }}>
-                    <div style={{ fontSize: 11, color: C.text3, letterSpacing: 2, marginBottom: 4 }}>ISKCON VISAKHAPATNAM</div>
+                    <div style={{ fontSize: 11, color: C.text3, letterSpacing: 2, marginBottom: 4 }}>HKM VISAKHAPATNAM</div>
                     <h2 className="title-font" style={{ color: C.gold, margin: 0, fontSize: 22 }}>FOLK Admin</h2>
                     <div style={{ fontSize: 12, color: C.saffron, marginTop: 4 }}>Head / Administrative Panel</div>
                 </div>

@@ -1,12 +1,12 @@
-// Design tokens — Gaudiya Vaishnava Theme
+// Design tokens — Gaudiya Vaishnava Theme (Light Mode)
 export const C = {
-  bg: "#0D0800",
-  surface: "#130E02",
-  surface2: "#1A1305",
-  border: "#2A1F0A",
-  text: "#F3EFEA",
-  text2: "#B3A895",
-  text3: "#7C7260",
+  bg: "#FAFAFA",
+  surface: "#FFFFFF",
+  surface2: "#FFF6EA", // Soft saffron tint
+  border: "#EADFCB",
+  text: "#1A1305",
+  text2: "#5A5141",
+  text3: "#8C8271",
 
   saffron: "#FF9F1C",
   saffronLight: "rgba(255,159,28,0.15)",
@@ -18,8 +18,8 @@ export const C = {
 
   gradient: "linear-gradient(135deg, #FF9F1C, #F4C430)",
 
-  shadow: "0 4px 12px rgba(0,0,0,0.5)",
-  shadowMd: "0 8px 24px rgba(0,0,0,0.6)",
+  shadow: "0 4px 12px rgba(0,0,0,0.08)",
+  shadowMd: "0 8px 24px rgba(0,0,0,0.12)",
 
   radius: "16px",
   radiusPill: "999px",

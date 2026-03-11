@@ -33,7 +33,7 @@ export default function Profile() {
                 <Avatar initials="K" size={120} lotusRing />
 
                 <h2 className="title-font" style={{ marginTop: 16, fontSize: 24 }}>{user?.spiritualName || user?.name || 'Krishna Das'}</h2>
-                <div style={{ color: C.text2, marginBottom: 8 }}>@{user?.username || 'krishnadas'} · {user?.center || 'ISKCON Vizag'}</div>
+                <div style={{ color: C.text2, marginBottom: 8 }}>@{user?.username || 'krishnadas'} · {user?.center || 'HKM Vizag'}</div>
                 <Tag color={C.gold}>{user?.role?.toUpperCase() || 'MEMBER'}</Tag>
 
                 <div
@@ -172,8 +172,13 @@ function EditProfile({ onClose }) {
                         <div style={{ paddingTop: 16 }}>
                             {sec === 'A' && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                    <div style={{ borderRadius: 12, border: `1px solid ${C.gold}4D`, backgroundColor: `${C.gold}0D`, padding: 16 }}>
+                                        <p style={{ fontSize: 12, color: '#A08E70', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>🙏 Guru — Founder Acharya</p>
+                                        <p style={{ fontFamily: '"Tiro Devanagari Sanskrit", serif', color: C.gold, fontSize: 18, lineHeight: 1.3 }}>His Divine Grace A.C. Bhaktivedanta Swami Prabhupada</p>
+                                        <p style={{ fontSize: 12, color: '#A08E70', marginTop: 4 }}>Founder-Acharya, International Society for Krishna Consciousness</p>
+                                    </div>
                                     <Input label="Spiritual Name" val="Krishna Das" />
-                                    <Input label="Home Temple" val="ISKCON Visakhapatnam" />
+                                    <Input label="Home Temple" val="HKM Visakhapatnam" />
                                     <Input label="Chanting Rounds" val="16" />
                                 </div>
                             )}

@@ -8,56 +8,95 @@ import axios from 'axios';
 export default function AuthApp() {
     const { setUser } = useContext(UserContext);
     const navigate = useNavigate();
-    const [email, setEmail] = useState('member@folk-vizag.org');
-    const [otp, setOtp] = useState('123456'); // Using OTP field for password right now
+    const [identifier, setIdentifier] = useState('');
+    const [otp, setOtp] = useState('');
+    const [step, setStep] = useState(1); // 1: Identifier, 2: OTP
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    const handleLogin = async () => {
+    const handleRequestOTP = async () => {
+        if (!identifier) return setError("Please enter email or phone");
         setLoading(true);
+        setError(null);
         try {
-            // Note: Our seed script uses `username` inside the db, not email.
-            // But we seeded `username` with the email.
-            const res = await axios.post('/api/auth/login', { username: email, password: otp });
+            await axios.post('/api/auth/otp/start', { identifier });
+            setStep(2);
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to send OTP. Please try again.");
+        }
+        setLoading(false);
+    };
+
+    const handleVerifyOTP = async () => {
+        if (!otp) return setError("Please enter OTP");
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await axios.post('/api/auth/otp/verify', { identifier, otp });
             const { token, user } = res.data;
             localStorage.setItem('folk_token', token);
             setUser(user);
 
-            if (["admin", "head"].includes(user.role)) navigate("/admin/dashboard");
-            else if (user.role === "guide") navigate("/guide/console");
+            if (["admin", "head", "folk_admin"].includes(user.role)) navigate("/admin/dashboard");
+            else if (["guide", "folk_guide"].includes(user.role)) navigate("/guide/console");
             else if (user.role === "security") navigate("/security/scan");
             else navigate("/app/home");
         } catch (err) {
-            console.error(err);
-            alert("Invalid credentials or server error");
+            setError(err.response?.data?.message || "Invalid OTP. Please try again.");
         }
         setLoading(false);
     };
 
     return (
-        <div style={{ padding: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', paddingBottom: 60 }}>
+        <div style={{ padding: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', paddingBottom: 60, background: C.bg }}>
             <Card style={{ width: '100%', maxWidth: 400 }}>
                 <OmWatermark />
-                <h1 style={{ color: C.saffron, textAlign: 'center', marginBottom: 8 }} className="app-name">FOLK</h1>
-                <p style={{ textAlign: 'center', color: C.text2, fontSize: 14 }}>Friends Of Lord Krishna</p>
-                <div style={{ marginTop: 32 }}>
-                    <label style={{ fontSize: 13, color: C.text3 }}>Email/Phone</label>
-                    <input
-                        type="text" value={email} onChange={e => setEmail(e.target.value)}
-                        style={{ width: '100%', padding: '12px 0', borderBottom: `2px solid ${C.saffron}`, marginBottom: 24 }}
-                    />
-                    <label style={{ fontSize: 13, color: C.text3 }}>OTP</label>
-                    <input
-                        type="text" value={otp} onChange={e => setOtp(e.target.value)}
-                        style={{ width: '100%', padding: '12px 0', borderBottom: `2px solid ${C.saffron}`, marginBottom: 32 }}
-                    />
-                    <PrimaryBtn onClick={handleLogin}>{loading ? 'Authenticating...' : 'Jai Srila Prabhupada 🙏'}</PrimaryBtn>
+                <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                    <h1 style={{ color: C.saffron, margin: 0, fontSize: 32 }} className="app-name">FOLK</h1>
+                    <p style={{ color: C.text2, fontSize: 13, textTransform: 'uppercase', letterSpacing: 2, marginTop: 4 }}>Hare Krishna Movement Vizag</p>
                 </div>
 
-                <div style={{ marginTop: 24, fontSize: 12, color: C.text3, textAlign: 'center' }}>
-                    Seed Users: <br />
-                    member@folk-vizag.org | guide@folk-vizag.org | admin@folk-vizag.org
+                {error && (
+                    <div style={{ padding: '12px 16px', background: `${C.lotus}15`, color: C.lotus, borderRadius: C.radius, fontSize: 13, marginBottom: 24, border: `1px solid ${C.lotus}33` }}>
+                        {error}
+                    </div>
+                )}
+
+                {step === 1 ? (
+                    <div>
+                        <label style={{ fontSize: 13, color: C.text3 }}>Email or Phone Number</label>
+                        <input
+                            type="text"
+                            placeholder="e.g. 9988776655"
+                            value={identifier}
+                            onChange={e => setIdentifier(e.target.value)}
+                            style={{ width: '100%', padding: '12px 0', border: 'none', borderBottom: `2px solid ${C.saffron}`, marginBottom: 32, fontSize: 18, background: 'transparent', outline: 'none' }}
+                        />
+                        <PrimaryBtn onClick={handleRequestOTP}>{loading ? 'Sending...' : 'Get OTP'}</PrimaryBtn>
+                    </div>
+                ) : (
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                            <label style={{ fontSize: 13, color: C.text3 }}>Enter 6-digit OTP</label>
+                            <button onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: C.saffron, fontSize: 12, cursor: 'pointer' }}>Change</button>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="000000"
+                            value={otp}
+                            onChange={e => setOtp(e.target.value)}
+                            style={{ width: '100%', padding: '12px 0', border: 'none', borderBottom: `2px solid ${C.saffron}`, marginBottom: 32, fontSize: 24, textAlign: 'center', letterSpacing: 8, background: 'transparent', outline: 'none' }}
+                        />
+                        <PrimaryBtn onClick={handleVerifyOTP}>{loading ? 'Verifying...' : 'Jai Srila Prabhupada 🙏'}</PrimaryBtn>
+                    </div>
+                )}
+
+                <div style={{ marginTop: 40, fontSize: 11, color: C.text3, textAlign: 'center', fontStyle: 'italic' }}>
+                    By joining, you agree to take shelter of <br />
+                    the Hare Krishna Movement Visakhapatnam.
                 </div>
             </Card>
         </div>
     );
 }
+

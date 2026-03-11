@@ -18,12 +18,13 @@ import Coupons from '../screens/Member/Coupons';
 import QRScanner from '../screens/Member/QRScanner';
 import AttendanceHistory from '../screens/Member/AttendanceHistory';
 import Notifications from '../screens/Member/Notifications';
+import Chat from '../screens/Member/Chat';
 
 // Icons (emoji-based for simplicity, no import errors)
 const BOTTOM_NAV = [
     { path: '/app/home', emoji: '🏠', label: 'Home' },
     { path: '/app/explore', emoji: '🔍', label: 'Explore' },
-    { path: '/app/post', emoji: '➕', label: 'Post' },
+    { path: '/app/post', emoji: '➕', label: 'Share Realization' },
     { path: '/app/features', emoji: '⚡', label: 'Features' },
     { path: '/app/profile', emoji: '👤', label: 'Profile' },
 ];
@@ -134,6 +135,8 @@ export default function MemberApp() {
                 <Route path="/attendance" element={<AttendanceHistory />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/features" element={<FeaturesTab />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/chat/:threadId" element={<Chat />} />
                 <Route path="*" element={<HomeFeed />} />
             </Routes>
 
