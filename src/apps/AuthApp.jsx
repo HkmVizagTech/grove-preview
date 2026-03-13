@@ -9,46 +9,16 @@ export default function AuthApp() {
     const { setUser } = useContext(UserContext);
     const navigate = useNavigate();
     const [identifier, setIdentifier] = useState('');
-    const [otp, setOtp] = useState('');
-    const [step, setStep] = useState(1); // 1: Identifier, 2: OTP
+    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const handleRequestOTP = async () => {
-        if (!identifier) return setError("Please enter email or phone");
+    const handleLogin = async () => {
+        if (!identifier || !password) return setError("Please enter email and password");
         setLoading(true);
         setError(null);
         try {
-            await axios.post('/api/auth/otp/start', { identifier });
-            setStep(2);
-
-            // Fetch Dev OTP if in dev mode
-            if (import.meta.env.VITE_API_URL?.includes('localhost')) {
-                setTimeout(async () => {
-                    try {
-                        const res = await axios.get(`/api/dev/otp/${identifier}`);
-                        if (res.data?.otp) {
-                            alert(`DEV MODE: Your OTP is ${res.data.otp}`);
-                            setOtp(res.data.otp);
-                        }
-                    } catch (e) {
-                        console.log('Dev OTP fetch failed', e);
-                    }
-                }, 1000);
-            }
-
-        } catch (err) {
-            setError(err.response?.data?.message || "Failed to send OTP. Please try again.");
-        }
-        setLoading(false);
-    };
-
-    const handleVerifyOTP = async () => {
-        if (!otp) return setError("Please enter OTP");
-        setLoading(true);
-        setError(null);
-        try {
-            const res = await axios.post('/api/auth/otp/verify', { identifier, otp });
+            const res = await axios.post('/api/auth/login', { email: identifier, password });
             const { token, user } = res.data;
             localStorage.setItem('folk_token', token);
             setUser(user);
@@ -58,7 +28,7 @@ export default function AuthApp() {
             else if (user.role === "security") navigate("/security/scan");
             else navigate("/app/home");
         } catch (err) {
-            setError(err.response?.data?.message || "Invalid OTP. Please try again.");
+            setError(err.response?.data?.message || "Login failed. Please check your credentials.");
         }
         setLoading(false);
     };
@@ -78,38 +48,39 @@ export default function AuthApp() {
                     </div>
                 )}
 
-                {step === 1 ? (
-                    <div>
-                        <label style={{ fontSize: 13, color: C.text3 }}>Email or Phone Number</label>
+                <div>
+                    <div style={{ marginBottom: 20 }}>
+                        <label style={{ fontSize: 13, color: C.text3 }}>Email Address</label>
                         <input
-                            type="text"
-                            placeholder="e.g. 9988776655"
+                            type="email"
+                            placeholder="email@example.com"
                             value={identifier}
                             onChange={e => setIdentifier(e.target.value)}
-                            style={{ width: '100%', padding: '12px 0', border: 'none', borderBottom: `2px solid ${C.saffron}`, marginBottom: 32, fontSize: 18, background: 'transparent', outline: 'none' }}
+                            style={{ width: '100%', padding: '12px 0', border: 'none', borderBottom: `2px solid ${C.saffron}`, fontSize: 16, background: 'transparent', outline: 'none' }}
                         />
-                        <PrimaryBtn onClick={handleRequestOTP}>{loading ? 'Sending...' : 'Get OTP'}</PrimaryBtn>
                     </div>
-                ) : (
-                    <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                            <label style={{ fontSize: 13, color: C.text3 }}>Enter 6-digit OTP</label>
-                            <button onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: C.saffron, fontSize: 12, cursor: 'pointer' }}>Change</button>
-                        </div>
+
+                    <div style={{ marginBottom: 32 }}>
+                        <label style={{ fontSize: 13, color: C.text3 }}>Password</label>
                         <input
-                            type="text"
-                            placeholder="000000"
-                            value={otp}
-                            onChange={e => setOtp(e.target.value)}
-                            style={{ width: '100%', padding: '12px 0', border: 'none', borderBottom: `2px solid ${C.saffron}`, marginBottom: 32, fontSize: 24, textAlign: 'center', letterSpacing: 8, background: 'transparent', outline: 'none' }}
+                            type="password"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            style={{ width: '100%', padding: '12px 0', border: 'none', borderBottom: `2px solid ${C.saffron}`, fontSize: 16, background: 'transparent', outline: 'none' }}
                         />
-                        <PrimaryBtn onClick={handleVerifyOTP}>{loading ? 'Verifying...' : 'Jai Srila Prabhupada 🙏'}</PrimaryBtn>
                     </div>
-                )}
+
+                    <PrimaryBtn onClick={handleLogin}>{loading ? 'Logging in...' : 'Sign In'}</PrimaryBtn>
+                </div>
 
                 <div style={{ marginTop: 40, fontSize: 11, color: C.text3, textAlign: 'center', fontStyle: 'italic' }}>
                     By joining, you agree to take shelter of <br />
                     the Hare Krishna Movement Visakhapatnam.
+                    <br /><br />
+                    <div style={{ opacity: 0.6 }}>
+                        Authorized access for devotees only.
+                    </div>
                 </div>
             </Card>
         </div>
