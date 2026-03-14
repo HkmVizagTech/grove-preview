@@ -9,12 +9,26 @@ import SecurityApp from "./apps/SecurityApp";
 export const UserContext = React.createContext();
 
 export default function App() {
-  // Rehydrate user from localStorage so route guards survive navigation/refresh
+  // Force default Admin session - LOGIN SYSTEM REMOVED
+  const DEFAULT_ADMIN = {
+    id: '69b3b15231109afc1b41d619',
+    role: 'admin', // Frontend expects 'admin' for AdminApp access
+    displayName: 'Temple Admin',
+    name: 'Temple Admin'
+  };
+
   const [user, setUserRaw] = useState(() => {
     try {
       const stored = localStorage.getItem('folk_user');
-      return stored ? JSON.parse(stored) : null;
-    } catch { return null; }
+      if (stored) return JSON.parse(stored);
+
+      // No session? Set the default admin
+      localStorage.setItem('folk_token', 'bypass-token');
+      localStorage.setItem('folk_user', JSON.stringify(DEFAULT_ADMIN));
+      return DEFAULT_ADMIN;
+    } catch {
+      return DEFAULT_ADMIN;
+    }
   });
 
   const setUser = (u) => {
@@ -22,6 +36,7 @@ export default function App() {
     if (u) localStorage.setItem('folk_user', JSON.stringify(u));
     else localStorage.removeItem('folk_user');
   };
+
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
