@@ -20,16 +20,19 @@ export default function App() {
   const [user, setUserRaw] = useState(() => {
     try {
       const stored = localStorage.getItem('folk_user');
-      if (stored) return JSON.parse(stored);
+      const u = stored ? JSON.parse(stored) : { ...DEFAULT_ADMIN };
 
-      // No session? Set the default admin
+      // Force role to admin for the current removal phase
+      u.role = 'admin';
+
       localStorage.setItem('folk_token', 'bypass-token');
-      localStorage.setItem('folk_user', JSON.stringify(DEFAULT_ADMIN));
-      return DEFAULT_ADMIN;
+      localStorage.setItem('folk_user', JSON.stringify(u));
+      return u;
     } catch {
       return DEFAULT_ADMIN;
     }
   });
+
 
   const setUser = (u) => {
     setUserRaw(u);
