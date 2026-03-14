@@ -6,9 +6,21 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export default function AuthApp() {
-    const { setUser } = useContext(UserContext);
+    const { user, setUser } = useContext(UserContext);
     const navigate = useNavigate();
+
+    // Auto-redirect if session exists
+    React.useEffect(() => {
+        if (user) {
+            if (["admin", "head", "folk_admin"].includes(user.role)) navigate("/admin/dashboard");
+            else if (["guide", "folk_guide"].includes(user.role)) navigate("/guide/console");
+            else if (user.role === "security") navigate("/security/scan");
+            else navigate("/app/home");
+        }
+    }, [user, navigate]);
+
     const [identifier, setIdentifier] = useState('');
+
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
